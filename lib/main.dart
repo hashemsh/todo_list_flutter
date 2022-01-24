@@ -4,15 +4,16 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todo_list_flutter/data.dart';
+import 'package:todo_list_flutter/edit.dart';
 
 const taskBoxName = 'task';
 void main() async {
   await Hive.initFlutter();
-  Hive.registerAdapter(TaskAdapter());
+  Hive.registerAdapter(TaskEntityAdapter());
   Hive.registerAdapter(PriorityAdapter());
   await Hive.openBox<TaskEntity>(taskBoxName);
   SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(statusBarColor: primaryVariantColor),
+    const SystemUiOverlayStyle(statusBarColor: primaryVariantColor),
   );
   runApp(const MyApp());
 }
@@ -71,7 +72,9 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EditTaskScreen(),
+              builder: (context) => EditTaskScreen(
+                task: TaskEntity(),
+              ),
             ),
           );
         },
@@ -288,44 +291,6 @@ class MyCheckBox extends StatelessWidget {
               size: 14,
             )
           : null,
-    );
-  }
-}
-
-class EditTaskScreen extends StatelessWidget {
-  final TextEditingController _controller = TextEditingController();
-
-  EditTaskScreen({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('edit task'),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          final task = TaskEntity();
-          task.name = _controller.text;
-          task.priority = Priority.low;
-          if (task.isInBox) {
-            task.save();
-          } else {
-            final Box<TaskEntity> box = Hive.box(taskBoxName);
-            box.add(task);
-          }
-          Navigator.of(context).pop();
-        },
-        label: const Text('save change'),
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _controller,
-            decoration:
-                const InputDecoration(label: Text('add a task for today ... ')),
-          )
-        ],
-      ),
     );
   }
 }
