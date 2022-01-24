@@ -38,18 +38,27 @@ class HomeScreen extends StatelessWidget {
         title: const Text('ToDo List'),
       ),
       floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => EditTaskScreen()));
-          },
-          label: const Text('add new task')),
-      body: ListView.builder(
-        itemCount: box.values.length,
-        itemBuilder: (context, index) {
-          final Task task = box.values.toList()[index];
-          return Text(
-            task.name,
-            style: TextStyle(fontSize: 24),
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => EditTaskScreen(),
+            ),
+          );
+        },
+        label: const Text('add new task'),
+      ),
+      body: ValueListenableBuilder<Box<Task>>(
+        valueListenable: box.listenable(),
+        builder: (context, box, child) {
+          return ListView.builder(
+            itemCount: box.values.length,
+            itemBuilder: (context, index) {
+              final Task task = box.values.toList()[index];
+              return Text(
+                task.name,
+                style: const TextStyle(fontSize: 24),
+              );
+            },
           );
         },
       ),
@@ -68,19 +77,20 @@ class EditTaskScreen extends StatelessWidget {
         title: const Text('edit task'),
       ),
       floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            final task = Task();
-            task.name = _controller.text;
-            task.priority = Priority.low;
-            if (task.isInBox) {
-              task.save();
-            } else {
-              final Box<Task> box = Hive.box(taskBoxName);
-              box.add(task);
-            }
-            Navigator.of(context).pop();
-          },
-          label: const Text('save change')),
+        onPressed: () {
+          final task = Task();
+          task.name = _controller.text;
+          task.priority = Priority.low;
+          if (task.isInBox) {
+            task.save();
+          } else {
+            final Box<Task> box = Hive.box(taskBoxName);
+            box.add(task);
+          }
+          Navigator.of(context).pop();
+        },
+        label: const Text('save change'),
+      ),
       body: Column(
         children: [
           TextField(
